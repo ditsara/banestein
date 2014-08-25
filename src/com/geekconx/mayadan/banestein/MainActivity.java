@@ -2,6 +2,9 @@ package com.geekconx.mayadan.banestein;
 
 import java.util.ArrayList;
 
+import com.squareup.otto.Bus;
+import com.squareup.otto.Subscribe;
+
 import android.os.Bundle;
 import android.app.Activity;
 
@@ -25,7 +28,8 @@ public class MainActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
-		txtResults = (TextView)findViewById(R.id.txt_output);				
+		txtResults = (TextView)findViewById(R.id.txt_output);
+		MainBus.getInstance().register(this);
 	}
 	
 	@Override
@@ -42,6 +46,7 @@ public class MainActivity extends Activity {
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
+		MainBus.getInstance().unregister(this);
 	}
 	
 	@Override
@@ -51,6 +56,8 @@ public class MainActivity extends Activity {
 		return true;
 	}
 
+	// speak() starts the chain of callbacks by kicking off an intent
+	// to get english speech and turn it into text
 	public void speak(View view) {
 		Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
 
@@ -77,8 +84,10 @@ public class MainActivity extends Activity {
 			if (resultCode == RESULT_OK) {
 				ArrayList<String> results = data.getStringArrayListExtra(
 						RecognizerIntent.EXTRA_RESULTS);
-
-				txtResults.setText(results.get(0).toString());
+				String resultStr = results.get(0).toString();
+				Log.d("Banestein", resultStr);
+				txtResults.setText(resultStr);
+				new TranslateTask().execute(resultStr);
 			}
 		}
 		// display message for the various voice recognition errors
@@ -95,13 +104,19 @@ public class MainActivity extends Activity {
 		}
 	}
 	
-	// helper method to display short toasts
+	// helper method to display short toasts (for errors)
 	private void showToastMessage(String msg) {
 		Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
 	}
 
-	public void mbCallback() {
-		Log.d("Banestein", "callback test");
+//	public void mbCallback() {
+//		Log.d("Banestein", "callback test");
+//	}
+	
+	@Subscribe
+	public void onTranslateResult(TranslateResultEvent translated) {
+		Log.d("Banestein", translated.getResult());
+		txtResults.append("\n" + translated.getResult());
 	}
 	
 	@Override

@@ -1,9 +1,9 @@
 package com.geekconx.mayadan.banestein;
 
-public class TranslateResultEvent {
+public class TranslateEvent {
 	private String result;
 
-	public TranslateResultEvent(String result) {
+	public TranslateEvent(String result) {
 		this.result = result;
 	}
 

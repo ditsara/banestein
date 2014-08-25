@@ -56,9 +56,8 @@ public class MainActivity extends Activity {
 		return true;
 	}
 
-	// speak() starts the chain of callbacks by kicking off an intent
-	// to get english speech and turn it into text
-	public void speak(View view) {
+	// 1. Starts callback chain by creating an Intent to recognize speech
+	public void recognize(View view) {
 		Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
 
 		// specify calling package to identify this app
@@ -75,8 +74,8 @@ public class MainActivity extends Activity {
 		startActivityForResult(intent, SPEECH_RECOG_REQ_CODE);
 	}
 
-	// callback for speech recognition activity; populates txtResult with first
-	// (highest-confidence) result
+	// 2. Callback for speech recognition activity; starts Translate task.
+	// Also populates txtResult with first (highest-confidence) result
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode,
 			Intent data) {
@@ -108,23 +107,29 @@ public class MainActivity extends Activity {
 	private void showToastMessage(String msg) {
 		Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
 	}
-
-//	public void mbCallback() {
-//		Log.d("Banestein", "callback test");
-//	}
 	
+	// 3. Translated text callback; starts GetAudio task
 	@Subscribe
-	public void onTranslateResult(TranslateResultEvent translated) {
+	public void onTranslate(TranslateEvent translated) {
 		Log.d("Banestein", translated.getResult());
 		txtResults.append("\n" + translated.getResult());
+		new GetAudioTask().execute(translated.getResult());
+	}
+
+	// 4. GetAudio callback (just log for now)
+	@Subscribe
+	public void onGetAudio(GetAudioEvent audio) {
+		Log.d("Banestein", audio.getResult().toString());
 	}
 	
+	// Intercepts headset button key-up and triggers recognize()
+	// (same method as button)
 	@Override
 	public boolean dispatchKeyEvent(KeyEvent e) {
 		if (e.getKeyCode() == KeyEvent.KEYCODE_HEADSETHOOK &&
 				e.getAction() == KeyEvent.ACTION_UP) {
 			Log.d("Banestein", "dispatchKey");
-			speak(txtResults);
+			recognize(txtResults);
 			return true;
 		}
 		return super.dispatchKeyEvent(e);

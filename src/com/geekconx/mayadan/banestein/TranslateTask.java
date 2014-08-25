@@ -34,7 +34,7 @@ public class TranslateTask extends AsyncTask<String, Void, String> {
 	}
 
 	@Override protected void onPostExecute(String result) {
-		MainBus.getInstance().post(new TranslateResultEvent(result));
+		MainBus.getInstance().post(new TranslateEvent(result));
 	}
 
 }

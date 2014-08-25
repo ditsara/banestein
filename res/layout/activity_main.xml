@@ -13,7 +13,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:text="@string/btn_speak"
-        android:onClick="speak" />
+        android:onClick="recognize" />
 
     
 

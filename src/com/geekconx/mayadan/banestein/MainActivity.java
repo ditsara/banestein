@@ -1,10 +1,20 @@
 package com.geekconx.mayadan.banestein;
 
+import java.io.BufferedInputStream;
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
+import android.media.AudioFormat;
+import android.media.AudioManager;
+import android.media.AudioTrack;
 import android.os.Bundle;
 import android.app.Activity;
 
@@ -113,13 +123,14 @@ public class MainActivity extends Activity {
 	public void onTranslate(TranslateEvent translated) {
 		Log.d("Banestein", translated.getResult());
 		txtResults.append("\n" + translated.getResult());
-		new GetAudioTask().execute(translated.getResult());
+		new GetAudioTask(this).execute(translated.getResult());
 	}
 
 	// 4. GetAudio callback (just log for now)
 	@Subscribe
 	public void onGetAudio(GetAudioEvent audio) {
 		Log.d("Banestein", audio.getResult().toString());
+		playRecord(audio.getResult());
 	}
 	
 	// Intercepts headset button key-up and triggers recognize()
@@ -135,5 +146,87 @@ public class MainActivity extends Activity {
 		return super.dispatchKeyEvent(e);
 	}
 	
+	//The function receives a file and plays it. 
+	void playRecord(File file){
+
+		//File file = new File(Environment.getExternalStorageDirectory(), "test.pcm");
+
+//		int shortSizeInBytes = Short.SIZE/Byte.SIZE;
+//
+//		int bufferSizeInBytes = (int)(file.length()/shortSizeInBytes);
+//		short[] audioData = new short[bufferSizeInBytes];
+//
+//		try {
+//			InputStream inputStream = new FileInputStream(file);
+//			BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
+//			DataInputStream dataInputStream = new DataInputStream(bufferedInputStream);
+//
+//			int i = 0;
+//			while(dataInputStream.available() > 0){
+//				audioData[i] = dataInputStream.readShort();
+//				i++;
+//			}
+//
+//			dataInputStream.close();
+
+			//   int sampleFreq = (Integer)spFrequency.getSelectedItem();
+			// int sampleFreq = 44100; //change this accordingly.
+			Integer[] freqset = {11025, 16000, 22050, 44100};
+			int fileLength = (int)file.length();
+			byte[] audioData = fileToBytes(file);
+
+			for (int j=1; j==4; j++)
+			{
+				int sampleFreq = freqset[j];
+
+				AudioTrack audioTrack = new AudioTrack(
+						AudioManager.STREAM_MUSIC,
+						sampleFreq,
+						AudioFormat.CHANNEL_OUT_MONO,
+						AudioFormat.ENCODING_PCM_16BIT,
+						fileLength,
+						AudioTrack.MODE_STREAM);
+
+				audioTrack.play();
+				audioTrack.write(audioData, 0, fileLength );
+			}
+
+//		} catch (FileNotFoundException e) {
+//			e.printStackTrace();
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
+	}
+	
+	private byte[] fileToBytes(File f) {
+		FileInputStream fin = null;
+		try {
+			fin = new FileInputStream(f);
+
+			byte fileContent[] = new byte[(int)f.length()];
+
+			// Reads up to certain bytes of data from this input stream into an array of bytes.
+			fin.read(fileContent);
+			return fileContent;
+		}
+		catch (FileNotFoundException e) {
+			Log.e("Banestein", "FileNotFoundException");
+			return null;
+		}
+		catch (IOException e) {
+			Log.e("Banestein", "IOException");
+			return null;
+		}
+		finally {
+			// close the stream
+			try {
+				if (fin != null) fin.close();
+			}
+			catch (IOException ioe) {
+				Log.e("Banestein", "Error while closing stream: " + ioe);
+			}
+		}
+
+	}
 	
 }

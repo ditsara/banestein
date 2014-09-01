@@ -1,28 +1,16 @@
 package com.geekconx.mayadan.banestein;
 
-import java.io.BufferedInputStream;
-import java.io.DataInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 
-import com.squareup.otto.Bus;
-import com.squareup.otto.Subscribe;
-
-import android.media.AudioFormat;
-import android.media.AudioManager;
-import android.media.AudioTrack;
-import android.media.MediaPlayer;
-import android.media.SoundPool;
-import android.net.Uri;
-import android.os.Bundle;
-import android.os.Environment;
 import android.app.Activity;
 import android.content.Intent;
-import android.content.res.AssetFileDescriptor;
+import android.media.AudioManager;
+import android.media.SoundPool;
+import android.media.SoundPool.OnLoadCompleteListener;
+import android.os.Bundle;
+import android.os.SystemClock;
 import android.speech.RecognizerIntent;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -31,9 +19,12 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.squareup.otto.Subscribe;
+
 public class MainActivity extends Activity {
 	private static final int SPEECH_RECOG_REQ_CODE = 1;
 	private TextView txtResults;
+	private static boolean soundLoaded = false;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -173,161 +164,42 @@ public class MainActivity extends Activity {
 	
 	void changeSoundFreuquecy(File file) throws FileNotFoundException
 	{
-		//creating a new file
-		//File file2 = new File(Environment.getExternalStorageDirectory(), "test.pcm");
-		
 	
+		soundLoaded = false;
 		SoundPool sp = new SoundPool(1, AudioManager.STREAM_MUSIC, 0);
-
-		 /** soundId for Later handling of sound pool **/
+	
+		sp.setOnLoadCompleteListener(new OnLoadCompleteListener(){
+		        @Override
+		        public void onLoadComplete(SoundPool soundPool, int sampleId,
+		                  int status) {
+		        	soundLoaded = true;
+		       }
+		 });
+		 
+		 //loading file
 		int soundId = sp.load(file.getAbsolutePath(), 1);
-		 
-		 
-		 sp.play(soundId, 1, 1, 1, 0, 0.65f);
-		 sp.resume(soundId);
+		
+		try
+		{
+			//waiting for sound to be loaded
+			for (int i=1;i<3;i++)
+			{
+				if (!soundLoaded)
+					Thread.sleep(2000);
+				//sp.play(soundId, 1, 1, 1, 0, 0.65f);
+			}
+			
+			sp.play(soundId, 1, 1, 1, 0, 0.65f);
+			Log.d("Banestein", "Played Sound");
+			//sp.release();
+		}
+		catch (InterruptedException e)
+		{
+		   Thread.currentThread().interrupt();
+		}
 		
 	}
 	
 	
 	
 }
-//	//The function receives a file and plays it. 
-//	void playRecord(File srcFile)
-//	{
-//		
-//	  File file = new File(srcFile.toString());
-//		
-//	  int sampleFreq = 44100;
-//	  int shortSizeInBytes = Short.SIZE/Byte.SIZE;
-//	  
-//	  int bufferSizeInBytes = (int)(file.length()/shortSizeInBytes);
-//	  short[] audioData = new short[bufferSizeInBytes];
-//	  
-//	  try {
-//	   InputStream inputStream = new FileInputStream(file);
-//	   BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
-//	   DataInputStream dataInputStream = new DataInputStream(bufferedInputStream);
-//	   
-//	   int i = 0;
-//	   
-//	   try{
-//	   while(dataInputStream.available() > 0){
-//	    audioData[i] = dataInputStream.readShort();
-//	    i++;
-//	   }
-//	   }
-//	   catch(IOException e)
-//	   {}
-//	   
-//	   dataInputStream.close();
-//	   
-//	   AudioTrack audioTrack = new AudioTrack(
-//	     AudioManager.STREAM_MUSIC,
-//	     sampleFreq,
-//	     AudioFormat.CHANNEL_CONFIGURATION_MONO,
-//	     AudioFormat.ENCODING_PCM_16BIT,
-//	     bufferSizeInBytes,
-//	     AudioTrack.MODE_STREAM);
-//	   
-//	   audioTrack.play();
-//	   audioTrack.write(audioData, 0, bufferSizeInBytes);
-//	
-//	   
-//	   
-//	  } catch (FileNotFoundException e) {
-//	   e.printStackTrace();
-//	  } catch (IOException e) {
-//	   e.printStackTrace();
-//	  }
-//	 }
-//	
-//	
-//	
-//	
-//
-//}
-	
-	//The function receives a file and plays it. 
-//	void playRecord(File file){
-
-		//File file = new File(Environment.getExternalStorageDirectory(), "test.pcm");
-
-//		int shortSizeInBytes = Short.SIZE/Byte.SIZE;
-//
-//		int bufferSizeInBytes = (int)(file.length()/shortSizeInBytes);
-//		short[] audioData = new short[bufferSizeInBytes];
-//
-//		try {
-//			InputStream inputStream = new FileInputStream(file);
-//			BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
-//			DataInputStream dataInputStream = new DataInputStream(bufferedInputStream);
-//
-//			int i = 0;
-//			while(dataInputStream.available() > 0){
-//				audioData[i] = dataInputStream.readShort();
-//				i++;
-//			}
-//
-//			dataInputStream.close();
-//
-//			//   int sampleFreq = (Integer)spFrequency.getSelectedItem();
-//			// int sampleFreq = 44100; //change this accordingly.
-//			Integer[] freqset = {11025, 16000, 22050, 44100};
-//			int fileLength = (int)file.length();
-//			byte[] audioData = fileToBytes(file);
-//
-//			for (int j=1; j==4; j++)
-//			{
-//				int sampleFreq = freqset[j];
-//
-//				AudioTrack audioTrack = new AudioTrack(
-//						AudioManager.STREAM_MUSIC,
-//						sampleFreq,
-//						AudioFormat.CHANNEL_OUT_MONO,
-//						AudioFormat.ENCODING_PCM_16BIT,
-//						fileLength,
-//						AudioTrack.MODE_STREAM);
-//
-//				audioTrack.play();
-//				audioTrack.write(audioData, 0, fileLength );
-//			}
-//
-//		} catch (FileNotFoundException e) {
-//			e.printStackTrace();
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
-//	}
-//	
-//	private byte[] fileToBytes(File f) {
-//		FileInputStream fin = null;
-//		try {
-//			fin = new FileInputStream(f);
-//
-//			byte fileContent[] = new byte[(int)f.length()];
-//
-//			// Reads up to certain bytes of data from this input stream into an array of bytes.
-//			fin.read(fileContent);
-//			return fileContent;
-//		}
-//		catch (FileNotFoundException e) {
-//			Log.e("Banestein", "FileNotFoundException");
-//			return null;
-//		}
-//		catch (IOException e) {
-//			Log.e("Banestein", "IOException");
-//			return null;
-//		}
-//		finally {
-//			// close the stream
-//			try {
-//				if (fin != null) fin.close();
-//			}
-//			catch (IOException ioe) {
-//				Log.e("Banestein", "Error while closing stream: " + ioe);
-//			}
-//		}
-//
-//	}
-//	
-//}

@@ -185,11 +185,10 @@ public class MainActivity extends Activity {
 			for (int i=1;i<3;i++)
 			{
 				if (!soundLoaded)
-					Thread.sleep(2000);
-				//sp.play(soundId, 1, 1, 1, 0, 0.65f);
+					Thread.sleep(1000);
 			}
 			
-			sp.play(soundId, 1, 1, 1, 0, 0.65f);
+			sp.play(soundId, 1, 1, 1, 0, 0.9f);
 			Log.d("Banestein", "Played Sound");
 			//sp.release();
 		}

@@ -119,12 +119,13 @@ public class MainActivity extends Activity {
 		new GetAudioTask(this).execute(translated.getResult());
 	}
 
-	// 4. GetAudio callback (just log for now)
+	// 4. GetAudio callback and start PlayTask
 	@Subscribe
 	public void onGetAudio(GetAudioEvent audio) {
 		Log.d("Banestein", audio.getResult().toString());
 		//playRecord(audio.getResult());
-		playMediaFile(audio.getResult());
+		//playMediaFile(audio.getResult());
+		new PlayTask(this).execute(audio.getResult());
 	}
 	
 	// Intercepts headset button key-up and triggers recognize()
@@ -139,66 +140,5 @@ public class MainActivity extends Activity {
 		}
 		return super.dispatchKeyEvent(e);
 	}
-	
-	
-	//Play mp3 file using media player
-	void playMediaFile(File file)
-	{	
-		//take from here : http://www.java2s.com/Code/Android/Media/PlayMp3filefromaUrl.htm
-		//Absolute Path : /data/data/com.geekconx.mayadan.banestein/cache/audio.mp3";
-		
-		//MediaPlayer mediaPlayer = MediaPlayer.create(this, Uri.fromFile(file));
-        //mediaPlayer.start();
-		
-		try {
-			
-			changeSoundFreuquecy(file);
-			
-		} catch (FileNotFoundException e) {
-
-			e.printStackTrace();
-		}
-	
-	}
-	
-	
-	void changeSoundFreuquecy(File file) throws FileNotFoundException
-	{
-	
-		soundLoaded = false;
-		SoundPool sp = new SoundPool(1, AudioManager.STREAM_MUSIC, 0);
-	
-		sp.setOnLoadCompleteListener(new OnLoadCompleteListener(){
-		        @Override
-		        public void onLoadComplete(SoundPool soundPool, int sampleId,
-		                  int status) {
-		        	soundLoaded = true;
-		       }
-		 });
-		 
-		 //loading file
-		int soundId = sp.load(file.getAbsolutePath(), 1);
-		
-		try
-		{
-			//waiting for sound to be loaded
-			for (int i=1;i<3;i++)
-			{
-				if (!soundLoaded)
-					Thread.sleep(1000);
-			}
-			
-			sp.play(soundId, 1, 1, 1, 0, 0.9f);
-			Log.d("Banestein", "Played Sound");
-			//sp.release();
-		}
-		catch (InterruptedException e)
-		{
-		   Thread.currentThread().interrupt();
-		}
-		
-	}
-	
-	
 	
 }

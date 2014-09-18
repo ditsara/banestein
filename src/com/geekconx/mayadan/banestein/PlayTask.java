@@ -9,12 +9,14 @@ import android.media.MediaPlayer;
 import android.media.SoundPool;
 import android.media.SoundPool.OnLoadCompleteListener;
 import android.media.audiofx.PresetReverb;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
 
 public class PlayTask extends AsyncTask<File, Void, Void> {
 	public static boolean soundLoaded;
 	private Context context;
+	private MediaPlayer mp;
 	
 	public PlayTask(Context c) {
 		this.context = c;
@@ -22,12 +24,10 @@ public class PlayTask extends AsyncTask<File, Void, Void> {
 	
 	protected Void doInBackground(File... args) {
 		File file = args[0];
-		
-		MediaPlayer mp = new MediaPlayer();
+
 		try {
-			Thread.sleep(2000);
-			mp.setDataSource(file.getAbsolutePath());
-			mp.prepare();
+			mp = MediaPlayer.create(context, Uri.fromFile(file));
+			// Thread.sleep(2000);
 			
 //			PresetReverb mReverb = new PresetReverb(1, 0);
 //			mReverb.setPreset(PresetReverb.PRESET_PLATE);
@@ -39,14 +39,6 @@ public class PlayTask extends AsyncTask<File, Void, Void> {
 		} catch (IllegalStateException e) {
 			Log.e("Banestein", e.toString());
 			e.printStackTrace();
-		} catch (IOException e) {
-			Log.e("Banestein", e.toString());
-			e.printStackTrace();
-		} catch (InterruptedException e) {
-			Log.e("Banestein", e.toString());
-			e.printStackTrace();
-		} finally {
-			mp.release();
 		}
 		
 		/*

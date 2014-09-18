@@ -3,14 +3,18 @@ package com.geekconx.mayadan.banestein;
 import java.io.File;
 import java.io.IOException;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.SoundPool;
 import android.media.SoundPool.OnLoadCompleteListener;
+import android.media.audiofx.EnvironmentalReverb;
+import android.media.audiofx.LoudnessEnhancer;
 import android.media.audiofx.PresetReverb;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.util.Log;
 
 public class PlayTask extends AsyncTask<File, Void, Void> 
@@ -35,6 +39,21 @@ implements MediaPlayer.OnCompletionListener{
 			mReverb.setEnabled(true);
 			mp.attachAuxEffect(mReverb.getId());
 			mp.setAuxEffectSendLevel(1.0f);
+			
+			// Can't get LoudnessEnhancer to work
+//			LoudnessEnhancer mLoud = new LoudnessEnhancer(mp.getAudioSessionId());
+//			mLoud.setTargetGain(100);
+//			mLoud.setEnabled(true);
+//			mp.attachAuxEffect(mLoud.getId());
+//			mp.setAuxEffectSendLevel(1.0f);
+			
+			// Unsure what the correct settings are for EnvironmentalReverb
+//			EnvironmentalReverb mReverb = new EnvironmentalReverb(1, 0);
+//			mReverb.setReverbDelay(15);
+//			// mReverb.setDecayTime(60);
+//			mReverb.setEnabled(true);
+//			mp.attachAuxEffect(mReverb.getId());
+//			mp.setAuxEffectSendLevel(1.0f);
 			
 			mp.start();
 		} catch (IllegalStateException e) {
@@ -84,5 +103,6 @@ implements MediaPlayer.OnCompletionListener{
 	public void onCompletion(MediaPlayer mp) {
 		Log.d("Banestein", "media playback complete; releasing resources");
 		mp.release();
+		mp = null;
 	}
 }

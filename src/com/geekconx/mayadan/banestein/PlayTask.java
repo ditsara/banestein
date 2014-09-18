@@ -13,7 +13,8 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
 
-public class PlayTask extends AsyncTask<File, Void, Void> {
+public class PlayTask extends AsyncTask<File, Void, Void> 
+implements MediaPlayer.OnCompletionListener{
 	public static boolean soundLoaded;
 	private Context context;
 	private MediaPlayer mp;
@@ -27,13 +28,13 @@ public class PlayTask extends AsyncTask<File, Void, Void> {
 
 		try {
 			mp = MediaPlayer.create(context, Uri.fromFile(file));
-			// Thread.sleep(2000);
+			mp.setOnCompletionListener(this);
 			
-//			PresetReverb mReverb = new PresetReverb(1, 0);
-//			mReverb.setPreset(PresetReverb.PRESET_PLATE);
-//			mReverb.setEnabled(true);
-//			mp.attachAuxEffect(mReverb.getId());
-//			mp.setAuxEffectSendLevel(1.0f);
+			PresetReverb mReverb = new PresetReverb(1, 0);
+			mReverb.setPreset(PresetReverb.PRESET_PLATE);
+			mReverb.setEnabled(true);
+			mp.attachAuxEffect(mReverb.getId());
+			mp.setAuxEffectSendLevel(1.0f);
 			
 			mp.start();
 		} catch (IllegalStateException e) {
@@ -77,5 +78,11 @@ public class PlayTask extends AsyncTask<File, Void, Void> {
 		}
 		*/
 		return null;
+	}
+
+	@Override
+	public void onCompletion(MediaPlayer mp) {
+		Log.d("Banestein", "media playback complete; releasing resources");
+		mp.release();
 	}
 }

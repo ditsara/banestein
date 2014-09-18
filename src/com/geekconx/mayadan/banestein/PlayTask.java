@@ -1,11 +1,14 @@
 package com.geekconx.mayadan.banestein;
 
 import java.io.File;
+import java.io.IOException;
 
 import android.content.Context;
 import android.media.AudioManager;
+import android.media.MediaPlayer;
 import android.media.SoundPool;
 import android.media.SoundPool.OnLoadCompleteListener;
+import android.media.audiofx.PresetReverb;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -19,6 +22,34 @@ public class PlayTask extends AsyncTask<File, Void, Void> {
 	
 	protected Void doInBackground(File... args) {
 		File file = args[0];
+		
+		MediaPlayer mp = new MediaPlayer();
+		try {
+			Thread.sleep(2000);
+			mp.setDataSource(file.getAbsolutePath());
+			mp.prepare();
+			
+//			PresetReverb mReverb = new PresetReverb(1, 0);
+//			mReverb.setPreset(PresetReverb.PRESET_PLATE);
+//			mReverb.setEnabled(true);
+//			mp.attachAuxEffect(mReverb.getId());
+//			mp.setAuxEffectSendLevel(1.0f);
+			
+			mp.start();
+		} catch (IllegalStateException e) {
+			Log.e("Banestein", e.toString());
+			e.printStackTrace();
+		} catch (IOException e) {
+			Log.e("Banestein", e.toString());
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			Log.e("Banestein", e.toString());
+			e.printStackTrace();
+		} finally {
+			mp.release();
+		}
+		
+		/*
 		soundLoaded = false;
 		SoundPool sp = new SoundPool(1, AudioManager.STREAM_MUSIC, 0);
 	
@@ -52,6 +83,7 @@ public class PlayTask extends AsyncTask<File, Void, Void> {
 		{
 		   Thread.currentThread().interrupt();
 		}
+		*/
 		return null;
 	}
 }
